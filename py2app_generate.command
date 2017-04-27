@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Checkout to current file path.
 cd "`dirname "$0"`"
 easy_install -U py2app

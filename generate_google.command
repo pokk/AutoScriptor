@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Checkout to current file path.
 cd "`dirname "$0"`"
 
