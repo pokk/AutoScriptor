@@ -13,20 +13,26 @@ if len(sys.argv) > 1:
 
 class AppGui(Frame):
     def __init__(self, master=None):
+        # Init the window frame.
         Frame.__init__(self, master)
         self.grid()
 
+        # Keeping the tk object.
         self.master = master
 
+        # Init the components.
         self.label_id = Label(self, text='Google File ID:')
         self.entry_id = Entry(self, width=50)
 
+        # Setting the components.
         self.__create_component()
 
     def callback(self, event):
         if 'Return' == event.keysym:
+            # Copy them to the clipboard.
             self.master.clipboard_clear()
             self.master.clipboard_append(self.entry_id.get().replace('open', 'uc'))
+            # Clear the entry.
             self.entry_id.delete(0, 'end')
 
     def __create_component(self):
@@ -41,6 +47,7 @@ def main():
     tk.resizable(width=FALSE, height=FALSE)
     tk.title('Change Google sharing uri to img uri')
     app = AppGui(tk)
+
     app.mainloop()
 
 
