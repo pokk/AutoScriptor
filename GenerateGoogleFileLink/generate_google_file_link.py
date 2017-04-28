@@ -21,7 +21,7 @@ class AppGui(Frame):
         self.master = master
 
         # Init the components.
-        self.label_id = Label(self, text='Google File ID:')
+        self.label_id = Label(self, text='Google File Share Link:')
         self.entry_id = Entry(self, width=50)
 
         # Setting the components.
