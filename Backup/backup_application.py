@@ -1,65 +1,9 @@
 """ Created by jieyi on 4/29/17. """
-import io
 import os
-import sys
 from copy import deepcopy
-from shutil import rmtree, copytree, copyfile
 
-# Simulate the redirect stdin.
-if len(sys.argv) > 1:
-    filename = sys.argv[1]
-    inp = ''.join(open(filename, "r").readlines())
-    sys.stdin = io.StringIO(inp)
-
-warning_str = '*** Warning!!! You didn\'t have "%s"...'
-start_syn_str = 'Start sync %s!!!'
-
-
-class DecoratorCheckDestination:
-    @staticmethod
-    def remove_backup(path):
-        if os.path.isdir(path):
-            rmtree(path)
-        elif os.path.isfile(path):
-            os.remove(path)
-
-    @staticmethod
-    def copy_backup(src, dst):
-        if os.path.isdir(src):
-            copytree(src, dst)
-        elif os.path.isfile(src):
-            copyfile(src, dst)
-
-    def __call__(self, func):
-        def wrapper(*args):
-            destination_path = os.path.expanduser('~/Dropbox')
-            # Checking if Dropbox is installed or not.
-            if os.path.exists(destination_path):
-                sync_folder = '/'.join([destination_path, 'Sync'])
-                # Checking if sync folder exists or not.
-                if not os.path.exists(sync_folder):
-                    # If not, create it.
-                    os.mkdir(sync_folder)
-
-                src, dst = func(args[0], args[1], sync_folder)
-
-                # If there exists a src preference, then remove it.
-                for s, d in zip(src, dst):
-                    # Ignore the src which isn't exist.
-                    if not os.path.exists(s):
-                        print(warning_str % s.split('/')[-1])
-                        continue
-                    if os.path.exists(d):
-                        self.remove_backup(d)
-
-                    # Sync the preference.
-                    self.copy_backup(s, d)
-
-                    print(f'Finished sync {d.split("/")[-1]}')
-            else:
-                print(warning_str % 'Dropbox')
-
-        return wrapper
+from Backup import start_syn_str, warning_str
+from Backup.decorator_back_process import DecoratorCheckDestination
 
 
 class BackupApp:
@@ -79,6 +23,7 @@ class BackupApp:
             self.__src_file_path = []
             self.__dst_file_path = []
 
+            # Start syncing the preferences.
             self.sync_preferences(stg)
             print('\n----------------------------------\n')
 
@@ -98,15 +43,15 @@ class BackupApp:
         self.__app_name = app_name.split('.')[0]
 
     def __obtain_src_file_path(self, file_content):
-        is_find_version = False
-        shift_number = 0
+        is_find_version = False  # Checking the newest file for sync.
+        shift_number = 0  # After deleting the number of the redundant comment line.
         copy_content = deepcopy(file_content)
 
         # Obtain all the src path from each setting files.
         for index, c in enumerate(copy_content):
             # If '#' or '[preferences' in the word.
             if any(key_word in c for key_word in ['#', '[preferences']):
-                is_find_version = 'slight' in c
+                is_find_version = 'slight' in c  # Mark the flag for searching the correct version.
                 file_content.remove(c)
                 shift_number += 1
             else:
@@ -131,9 +76,10 @@ class BackupApp:
         # Extracting folder name.
         folder = file_name.split('/')[-1]
         folder_path = file_name.split('/')[:-1]
-        # Search app name with version.
+        # Search app name with version from the folder direction.
         for folder_name in os.listdir(os.path.expanduser('/'.join(folder_path))):
             if folder in folder_name:
+                # Find it!!! Change the newest version file name.
                 folder_path.append(folder_name)
                 return '/'.join(folder_path)
 
@@ -142,12 +88,6 @@ class BackupApp:
 
 
 def main():
-    # d = '/'.join([os.getcwd(), 'application'])
-    # a = [name for name in os.listdir(d) if os.path.isfile('/'.join([d, name]))]
-    # with open('/'.join([d, a[0]])) as f:
-    #     content = f.readlines()
-    # 
-    # content = [x.strip() for x in content]
     b = BackupApp()
     b.backup_process()
 
