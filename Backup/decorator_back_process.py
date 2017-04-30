@@ -23,6 +23,8 @@ class DecoratorCheckDestination:
     def __call__(self, func):
         def wrapper(*args):
             destination_path = os.path.expanduser('~/Dropbox')
+            # Assign the message callback function.
+            msg_callback = args[2]
             # Checking if Dropbox is installed or not.
             if os.path.exists(destination_path):
                 sync_folder = '/'.join([destination_path, 'Sync'])
@@ -31,13 +33,13 @@ class DecoratorCheckDestination:
                     # If not, create it.
                     os.mkdir(sync_folder)
 
-                src, dst = func(args[0], args[1], sync_folder)
+                src, dst = func(args[0], args[1], sync_folder, args[2])
 
                 # If there exists a src preference, then remove it.
                 for s, d in zip(src, dst):
                     # Ignore the src which isn't exist.
                     if not os.path.exists(s):
-                        print(warning_str % s.split('/')[-1])
+                        msg_callback(warning_str % s.split('/')[-1])
                         continue
                     if os.path.exists(d):
                         self.remove_backup(d)
@@ -50,9 +52,9 @@ class DecoratorCheckDestination:
                     # Sync the preference.
                     self.copy_backup(s, d)
 
-                    print(f'Finished sync {d.split("/")[-1]} 👍👍👍👍')
+                    msg_callback(f'Finished sync {d.split("/")[-1]}\n')
             else:
-                print(warning_str % 'Dropbox')
+                msg_callback(warning_str % 'Dropbox')
 
         return wrapper
 

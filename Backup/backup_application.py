@@ -16,10 +16,12 @@ class BackupRestoreApp:
         self.__dst_file_path = []
         self.__is_find_version = False
         self.__is_backup = True
+        self.__msg_callback = None
 
-    def backup_restore_process(self, is_backup=True):
+    def backup_restore_process(self, msg_callback, is_backup=True):
         self.__pre_process()
         self.__is_backup = is_backup
+        self.__msg_callback = msg_callback
 
         # Parsing each of setting files' content.
         for stg in list(set(self.__settings) - set(self.__ignore_settings)):
@@ -28,16 +30,20 @@ class BackupRestoreApp:
             self.__dst_file_path = []
 
             # Start syncing the preferences.
-            self._sync_preferences(stg)
-            print('\n----------------------------------\n')
+            self._sync_preferences(stg, self.__msg_callback)
+            self.__msg_callback('\n\n----------------------------------\n\n')
+
+        # Show the msg for finishing syncing.
+        # messagebox.showinfo("Notification", "All application's preferences have finished syncing.")
+        self.__msg_callback("!!!!!! All application's preferences have finished syncing. !!!!!\n")
 
     @DecoratorCheckDestination()
-    def _sync_preferences(self, setting_file, dst_path):
+    def _sync_preferences(self, setting_file, dst_path, msg_callback):
         with open('/'.join([self.__folder_path, setting_file])) as f:
             content = [c.strip() for c in f.readlines()]
 
         self.__obtain_app_name(setting_file)
-        print(start_syn_str % self.__app_name)
+        self.__msg_callback(start_syn_str % self.__app_name)
         self.__obtain_src_file_path(content)
         self.__obtain_dst_file_path(dst_path, content)
 
@@ -91,7 +97,7 @@ class BackupRestoreApp:
                 # Find it!!! Change the newest version file name.
                 return '/'.join([folder_path, folder_name])
 
-        print(warning_str % folder)
+        self.__msg_callback(warning_str % folder)
         return None
 
     @property
@@ -104,8 +110,9 @@ class BackupRestoreApp:
 
 
 def main():
-    b = BackupRestoreApp()
-    b.backup_restore_process()
+    # b = BackupRestoreApp()
+    # b.backup_restore_process()
+    pass
 
 
 if __name__ == '__main__':
