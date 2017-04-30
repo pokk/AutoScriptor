@@ -43,7 +43,7 @@ class AppGui(Frame):
         Button(self, text='Invert', command=self._invert_checkbutton).grid(row=index + 1, column=0)
         Button(self, text='Select All', command=self._select_all_checkbutton).grid(row=index + 2, column=0)
         Button(self, text='Deselect All', command=self._deselect_all_checkbutton).grid(row=index + 2, column=1)
-        Button(self, text='Backup', command=self._backup_event).grid(row=index + 3, column=0)
+        Button(self, text='MagicBack', command=self._backup_event).grid(row=index + 3, column=0)
         Button(self, text='Restore', command=self._restore_event).grid(row=index + 3, column=1)
 
     def _backup_event(self):
@@ -83,7 +83,7 @@ class AppGui(Frame):
 def main():
     tk = Tk()
     tk.resizable(width=FALSE, height=FALSE)
-    tk.title('Backup & Restore application setting')
+    tk.title('MagicBack & Restore application setting')
     app = AppGui(tk)
 
     app.mainloop()
