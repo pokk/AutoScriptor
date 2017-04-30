@@ -13,6 +13,7 @@ class BackupApp:
         self.__app_name = ''
         self.__src_file_path = []
         self.__dst_file_path = []
+        self.__is_find_version = False
 
     def backup_process(self):
         self.__pre_process()
@@ -43,7 +44,7 @@ class BackupApp:
         self.__app_name = app_name.split('.')[0]
 
     def __obtain_src_file_path(self, file_content):
-        is_find_version = False  # Checking the newest file for sync.
+        self.__is_find_version = False  # Checking the newest file for sync.
         shift_number = 0  # After deleting the number of the redundant comment line.
         copy_content = deepcopy(file_content)
 
@@ -51,11 +52,12 @@ class BackupApp:
         for index, c in enumerate(copy_content):
             # If '#' or '[preferences' in the word.
             if any(key_word in c for key_word in ['#', '[preferences']):
-                is_find_version = 'slight' in c  # Mark the flag for searching the correct version.
+                self.__is_find_version = 'slight' in c  # Mark the flag for searching the correct version.
                 file_content.remove(c)
                 shift_number += 1
             else:
-                if is_find_version:
+                # If we need to add the version.
+                if self.__is_find_version:
                     path_with_version = self.__find_version(c)
                     file_content[index - shift_number] = path_with_version
 
@@ -63,9 +65,11 @@ class BackupApp:
             self.__src_file_path = [os.path.expanduser(path) for path in file_content if path is not None]
 
     def __obtain_dst_file_path(self, dst_path, file_content):
-        for c in file_content:
-            if c is not None:
-                self.__dst_file_path.append('/'.join([dst_path, c.split('/')[-1]]))
+        for c in [fc for fc in file_content if fc is not None]:
+            # If the file name are the same, we must separate them.
+            new_file_name = '.'.join([c.split('/')[-1], c.split('/')[-2].split()[-1]]) if self.__is_find_version \
+                else c.split('/')[-1]
+            self.__dst_file_path.append('/'.join([dst_path, self.__app_name, new_file_name]))
 
     def __pre_process(self):
         # Obtaining all setting files.
@@ -75,13 +79,13 @@ class BackupApp:
     def __find_version(self, file_name):
         # Extracting folder name.
         folder = file_name.split('/')[-1]
-        folder_path = file_name.split('/')[:-1]
+        folder_path = '/'.join(file_name.split('/')[:-1])
         # Search app name with version from the folder direction.
-        for folder_name in os.listdir(os.path.expanduser('/'.join(folder_path))):
+        for folder_name in [f for f in os.listdir(os.path.expanduser(folder_path))
+                            if os.path.isdir('/'.join([os.path.expanduser(folder_path), f]))]:
             if folder in folder_name:
                 # Find it!!! Change the newest version file name.
-                folder_path.append(folder_name)
-                return '/'.join(folder_path)
+                return '/'.join([folder_path, folder_name])
 
         print(warning_str % folder)
         return None

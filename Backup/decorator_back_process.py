@@ -41,6 +41,11 @@ class DecoratorCheckDestination:
                         continue
                     if os.path.exists(d):
                         self.remove_backup(d)
+                    # For that there are only file.
+                    target_folder = '/'.join(d.split('/')[:-1])
+                    if not os.path.exists(target_folder):
+                        # If not, create it.
+                        os.mkdir(target_folder)
 
                     # Sync the preference.
                     self.copy_backup(s, d)
