@@ -2,8 +2,8 @@
 import os
 from copy import deepcopy
 
-from Backup import start_syn_str, warning_str
-from Backup.decorator_back_process import DecoratorCheckDestination
+from __init__ import warning_str, start_syn_str
+from decorator_back_process import DecoratorCheckDestination
 
 
 class BackupRestoreApp:

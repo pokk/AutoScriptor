@@ -14,6 +14,7 @@ fi
 
 # Build python to mac app.
 py2applet --make-setup ${file_name}".py"
+rm -rf build dist
 python3 setup.py py2app -A
 
 # Rename.

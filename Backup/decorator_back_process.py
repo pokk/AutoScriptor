@@ -2,7 +2,7 @@
 import os
 from shutil import rmtree, copyfile, copytree
 
-from Backup import warning_str
+from __init__ import warning_str
 
 
 class DecoratorCheckDestination:
