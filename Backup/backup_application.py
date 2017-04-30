@@ -8,7 +8,7 @@ from decorator_back_process import DecoratorCheckDestination
 
 class BackupRestoreApp:
     def __init__(self):
-        self.__folder_path = '/'.join([os.getcwd(), 'application'])
+        self.__folder_path = '/'.join([os.path.dirname(__file__), 'application'])
         self.__settings = []
         self.__ignore_settings = []
         self.__app_name = ''

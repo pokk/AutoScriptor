@@ -7,7 +7,7 @@ from backup_application import BackupRestoreApp
 
 class AppGui(Frame):
     def __init__(self, master=None):
-        self.__folder_path = '/'.join([os.getcwd(), 'application'])
+        self.__folder_path = '/'.join([os.path.dirname(__file__), 'application'])
         self.__check_var = []
         self.__check_button_list = []
         # Keeping the tk object.
@@ -62,7 +62,7 @@ class AppGui(Frame):
         backup_process = BackupRestoreApp()
         ignore = [k.cget('text') for k, v in zip(self.__check_button_list, self.__check_var) if not v.get()]
         backup_process.ignore_setting = ignore
-        # backup_process.backup_restore_process(is_back)
+        backup_process.backup_restore_process(is_back)
 
 
 def main():
