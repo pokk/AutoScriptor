@@ -1,14 +1,6 @@
 """ Created by jieyi on 4/27/17. """
-import io
-import sys
 from tkinter import Frame, Tk, Label, Entry
 from tkinter.constants import FALSE
-
-# Simulate the redirect stdin.
-if len(sys.argv) > 1:
-    filename = sys.argv[1]
-    inp = ''.join(open(filename, "r").readlines())
-    sys.stdin = io.StringIO(inp)
 
 
 class AppGui(Frame):

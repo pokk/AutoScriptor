@@ -6,30 +6,33 @@ from Backup import start_syn_str, warning_str
 from Backup.decorator_back_process import DecoratorCheckDestination
 
 
-class BackupApp:
+class BackupRestoreApp:
     def __init__(self):
         self.__folder_path = '/'.join([os.getcwd(), 'application'])
         self.__settings = []
+        self.__ignore_settings = []
         self.__app_name = ''
         self.__src_file_path = []
         self.__dst_file_path = []
         self.__is_find_version = False
+        self.__is_backup = True
 
-    def backup_process(self):
+    def backup_restore_process(self, is_backup=True):
         self.__pre_process()
+        self.__is_backup = is_backup
 
         # Parsing each of setting files' content.
-        for stg in self.__settings:
+        for stg in list(set(self.__settings) - set(self.__ignore_settings)):
             # Init the lists.
             self.__src_file_path = []
             self.__dst_file_path = []
 
             # Start syncing the preferences.
-            self.sync_preferences(stg)
+            self._sync_preferences(stg)
             print('\n----------------------------------\n')
 
     @DecoratorCheckDestination()
-    def sync_preferences(self, setting_file, dst_path):
+    def _sync_preferences(self, setting_file, dst_path):
         with open('/'.join([self.__folder_path, setting_file])) as f:
             content = [c.strip() for c in f.readlines()]
 
@@ -38,7 +41,8 @@ class BackupApp:
         self.__obtain_src_file_path(content)
         self.__obtain_dst_file_path(dst_path, content)
 
-        return self.__src_file_path, self.__dst_file_path
+        return (self.__src_file_path, self.__dst_file_path) if self.__is_backup \
+            else (self.__dst_file_path, self.__src_file_path)
 
     def __obtain_app_name(self, app_name):
         self.__app_name = app_name.split('.')[0]
@@ -90,10 +94,18 @@ class BackupApp:
         print(warning_str % folder)
         return None
 
+    @property
+    def ignore_setting(self):
+        return self.__ignore_settings
+
+    @ignore_setting.setter
+    def ignore_setting(self, value):
+        self.__ignore_settings = value
+
 
 def main():
-    b = BackupApp()
-    b.backup_process()
+    b = BackupRestoreApp()
+    b.backup_restore_process()
 
 
 if __name__ == '__main__':
