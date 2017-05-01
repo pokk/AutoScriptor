@@ -3,8 +3,7 @@ import os
 from shutil import rmtree, copyfile, copytree
 
 from __init__ import warning_str
-
-from MagicBack.utils_zip import zip_files
+from utils_zip import zip_files
 
 temp_folder = '~/Documents'
 
@@ -27,6 +26,9 @@ class DecoratorCheckDestination:
     def __call__(self, func):
         def wrapper(*args):
             destination_path = os.path.expanduser('~/Dropbox')
+
+            remote_account = args[0].remote_account
+            app_name = args[1]
             # Assign the message callback function.
             msg_callback = args[2]
             # Checking if Dropbox is installed or not.
@@ -37,12 +39,12 @@ class DecoratorCheckDestination:
                     # If not, create it.
                     os.mkdir(sync_folder)
 
-                src, dst = func(args[0], args[1], sync_folder, args[2])
-                
-                print(src)
+                src, dst = func(args[0], app_name, sync_folder, msg_callback)
 
-                zip_files(src, os.path.join(temp_folder, '.'.join([args[1].split('.')[0], 'zip'])))
-                # print(dst)
+                print(src)
+                # Zip the preferences.
+                zip_files(src, os.path.join(temp_folder, '.'.join([app_name.split('.')[0], 'zip'])))
+                # remote_account.upload_file()
 
                 # # If there exists a src preference, then remove it.
                 # for s, d in zip(src, dst):

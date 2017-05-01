@@ -17,6 +17,7 @@ class BackupRestoreApp:
         self.__is_find_version = False
         self.__is_backup = True
         self.__msg_callback = None
+        self.__remote_account = None
 
     def backup_restore_process(self, msg_callback, is_backup=True):
         self.__pre_process()
@@ -107,6 +108,14 @@ class BackupRestoreApp:
     @ignore_setting.setter
     def ignore_setting(self, value):
         self.__ignore_settings = value
+
+    @property
+    def remote_account(self):
+        return self.__remote_account
+
+    @remote_account.setter
+    def remote_account(self, value):
+        self.__remote_account = value
 
 
 def main():
