@@ -8,7 +8,7 @@ Collect I use to use auto script.
 2. GenerateGoogleFileLink
 
 Introduction
--------------
+------------
 
 
 # How to use
@@ -20,9 +20,8 @@ There are `build.command` in each of modules' folder. After you double click the
 
 -  The `build.command` may be **not able to run**. You can double click it after you
    modify their the **permission**.
-
-> Open the terminal and go to the `build.command` folder. Following the instructions as
-> the below.
+   - Open the terminal and go to the `build.command` folder. Following the instructions as
+     the below.
 
 ```shell
  chmod 755 build.command
