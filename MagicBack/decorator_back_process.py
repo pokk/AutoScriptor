@@ -1,71 +1,35 @@
 """ Created by jieyi on 4/30/17. """
 import os
-from shutil import rmtree, copyfile, copytree
 
-from __init__ import warning_str
 from utils_zip import zip_files
 
 temp_folder = '~/Documents'
+root_remote_folder = '/Syncc'
 
 
 class DecoratorCheckDestination:
-    @staticmethod
-    def remove_backup(path):
-        if os.path.isdir(path):
-            rmtree(path)
-        elif os.path.isfile(path):
-            os.remove(path)
-
-    @staticmethod
-    def copy_backup(src, dst):
-        if os.path.isdir(src):
-            copytree(src, dst)
-        elif os.path.isfile(src):
-            copyfile(src, dst)
-
     def __call__(self, func):
         def wrapper(*args):
-            destination_path = os.path.expanduser('~/Dropbox')
-
             remote_account = args[0].remote_account
             app_name = args[1]
             # Assign the message callback function.
             msg_callback = args[2]
-            # Checking if Dropbox is installed or not.
-            if os.path.exists(destination_path):
-                sync_folder = '/'.join([destination_path, 'Sync'])
-                # Checking if sync folder exists or not.
-                if not os.path.exists(sync_folder):
-                    # If not, create it.
-                    os.mkdir(sync_folder)
 
-                src, dst = func(args[0], app_name, sync_folder, msg_callback)
+            src = func(*args)
 
-                print(src)
-                # Zip the preferences.
-                zip_files(src, os.path.join(temp_folder, '.'.join([app_name.split('.')[0], 'zip'])))
-                # remote_account.upload_file()
+            if not src or 0 == len(src):
+                print('No kind of src')
 
-                # # If there exists a src preference, then remove it.
-                # for s, d in zip(src, dst):
-                #     # Ignore the src which isn't exist.
-                #     if not os.path.exists(s):
-                #         msg_callback(warning_str % s.split('/')[-1])
-                #         continue
-                #     if os.path.exists(d):
-                #         self.remove_backup(d)
-                #     # For that there are only file.
-                #     target_folder = '/'.join(d.split('/')[:-1])
-                #     if not os.path.exists(target_folder):
-                #         # If not, create it.
-                #         os.mkdir(target_folder)
-                # 
-                #     # Sync the preference.
-                #     self.copy_backup(s, d)
-                # 
-                #     msg_callback(f'Finished sync {d.split("/")[-1]}\n')
-            else:
-                msg_callback(warning_str % 'Dropbox')
+            # Zip variables.
+            zip_file_name = '.'.join([app_name.split('.')[0], 'zip'])
+            full_zip_file = os.path.expanduser(os.path.join(temp_folder, zip_file_name))
+
+            # Zip.
+            zip_files(src, full_zip_file)
+            # Upload.
+            remote_account.upload_file(full_zip_file, os.path.join(root_remote_folder, zip_file_name))
+            # Remove the temp file.
+            os.remove(full_zip_file)
 
         return wrapper
 

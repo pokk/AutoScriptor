@@ -8,7 +8,7 @@ class DecoratorCheckLogin:
                 print('You\'re not login now...')
                 return
 
-            func()
+            func(*args)
 
         return wrapper
 

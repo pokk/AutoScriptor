@@ -39,17 +39,15 @@ class BackupRestoreApp:
         self.__msg_callback("!!!!!! All application's preferences have finished syncing. !!!!!\n")
 
     @DecoratorCheckDestination()
-    def _sync_preferences(self, setting_file, dst_path, msg_callback):
+    def _sync_preferences(self, setting_file, msg_callback):
         with open('/'.join([self.__folder_path, setting_file])) as f:
             content = [c.strip() for c in f.readlines()]
 
         self.__obtain_app_name(setting_file)
         self.__msg_callback(start_syn_str % self.__app_name)
         self.__obtain_src_file_path(content)
-        self.__obtain_dst_file_path(dst_path, content)
 
-        return (self.__src_file_path, self.__dst_file_path) if self.__is_backup \
-            else (self.__dst_file_path, self.__src_file_path)
+        return self.__src_file_path if self.__is_backup else self.__dst_file_path
 
     def __obtain_app_name(self, app_name):
         self.__app_name = app_name.split('.')[0]

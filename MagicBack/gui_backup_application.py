@@ -3,6 +3,7 @@ import os
 from tkinter import Tk, FALSE, Frame, W, Checkbutton, Button, BooleanVar, Text, INSERT, Label, END
 
 from backup_application import BackupRestoreApp
+from decorator_back_process import root_remote_folder
 from dropbox_uploader import DropboxUploader
 
 
@@ -68,10 +69,12 @@ class AppGui(Frame):
     def __pre_backup_restore(self, is_back=True):
         self.__msg_text.delete(1.0, END)
         backup_process = BackupRestoreApp()
+        backup_process.remote_account = DropboxUploader()
+        # Create a new sync folder on the remote.
+        backup_process.remote_account.create_folder(root_remote_folder)
         ignore = [k.cget('text') for k, v in zip(self.__check_button_list, self.__check_var) if not v.get()]
         backup_process.ignore_setting = ignore
         backup_process.backup_restore_process(self.__add_msg, is_back)
-        backup_process.remote_account = DropboxUploader()
 
     def __add_msg(self, msg):
         self.__msg_text.insert(INSERT, msg)
