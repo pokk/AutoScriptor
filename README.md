@@ -7,16 +7,19 @@ Collect I use to use auto script.
 1. MagicBack
 2. GenerateGoogleFileLink
 
-Introduction
--------------
+## Introduction
 
+- MagicBack
+  - You must have the experience that you're using computers more than one. You'd like to
+    sync the preferences on your each of computers. Now you can use this `MagicBack` to
+    sync them for the each computer you're using.
 
 # How to use
 
 There are `build.command` in each of modules' folder. After you double click the
 `build.command`, then the app will be created.
 
-## NOTICE
+### - NOTICE
 
 -  The `build.command` may be **not able to run**. You can double click it after you
    modify their the **permission**.
