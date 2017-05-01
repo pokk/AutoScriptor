@@ -4,7 +4,7 @@ import os
 from utils_zip import zip_files
 
 temp_folder = '~/Documents'
-root_remote_folder = '/Syncc'
+root_remote_folder = '/Sync'
 
 
 class DecoratorCheckDestination:
