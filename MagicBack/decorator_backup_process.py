@@ -73,8 +73,10 @@ class DecoratorDownloader:
     def _move_file(self, src):
         for dir_path, dir_names, file_names in os.walk(os.path.expanduser(src)):
             for filename in file_names:
-                if '.DS_Store' not in filename:
+                try:
                     os.rename(os.path.join(dir_path, filename), '/'.join([''] + dir_path.split('/')[4:] + [filename]))
+                except Exception as e:
+                    print(e)
 
 
 def main():
