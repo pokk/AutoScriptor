@@ -3,14 +3,16 @@ import os
 
 import dropbox
 from decorator_check_login import DecoratorCheckLogin
+from dropbox import files
 from dropbox.exceptions import ApiError
 
 token_file = 'access.token'
 
 
 class DropboxHelper:
-    def __init__(self):
+    def __init__(self, token=None):
         self.SYNC_FOLDER_NAME = 'Sync'
+        self.__token = token
         self.__connect = None
         self.__is_sync_folder = False
 
@@ -56,7 +58,8 @@ class DropboxHelper:
                 print('Finished opening the zip file...')
                 # If the file size is less than 20MB.
                 if (file_size >> 20) < 20:
-                    res = self.__connect.files_upload(f.read(), dst_path, mute=True)
+                    # TODO: 5/2/17 If the file exists, we should update it.
+                    res = self.__connect.files_upload(f.read(), dst_path, mode=files.WriteMode.overwrite, mute=True)
                 else:
                     # Starting the uploading session.
                     upload_session_start_result = self.__connect.files_upload_session_start(f.read(CHUNK_SIZE))
@@ -96,11 +99,13 @@ class DropboxHelper:
             print(e)
 
     def __pre_process(self):
-        with open(token_file) as f:
+        with open(os.path.expanduser(os.path.join(os.path.dirname(__file__), token_file))) as f:
             content = [c.strip() for c in f.readlines()]
 
-        token = content[1]  # token.
-        self.__connect = dropbox.Dropbox(token)
+        if not self.__token:
+            self.__token = content[1]  # token.
+
+        self.__connect = dropbox.Dropbox(self.__token)
 
         # Checking.
         try:
