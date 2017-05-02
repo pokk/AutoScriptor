@@ -18,7 +18,8 @@ class DecoratorCheckDestination:
             src = func(*args)
 
             if not src or 0 == len(src):
-                print(f'NOTICE!! You don\'t install the {app_name}')
+                print()
+                msg_callback(f'NOTICE!! You don\'t install the {app_name}')
                 return
 
             # Zip variables.
@@ -27,10 +28,13 @@ class DecoratorCheckDestination:
 
             # Zip the app preferences.
             zip_files(src, full_zip_file)
+            msg_callback('Finished packing preferences file to a zip package...')
             # Upload.
-            # remote_account.upload_file(full_zip_file, os.path.join(root_remote_folder, zip_file_name))
+            remote_account.upload_file(full_zip_file, os.path.join(root_remote_folder, zip_file_name))
+            msg_callback(f'{zip_file_name} starts uploading...')
             # Remove the temp file.
-            # os.remove(full_zip_file)
+            os.remove(full_zip_file)
+            msg_callback('Finished uploading and remove the temp zip package.')
 
         return wrapper
 

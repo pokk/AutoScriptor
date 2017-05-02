@@ -54,24 +54,26 @@ class DropboxHelper:
             res = None
             with open(full_src_path, 'rb') as f:
                 print('Finished opening the zip file...')
-                # If the file size is less than 150MB.
-                if (file_size << 20) < 150:
+                # If the file size is less than 20MB.
+                if (file_size >> 20) < 20:
                     res = self.__connect.files_upload(f.read(), dst_path, mute=True)
                 else:
+                    # Starting the uploading session.
                     upload_session_start_result = self.__connect.files_upload_session_start(f.read(CHUNK_SIZE))
                     cursor = dropbox.files.UploadSessionCursor(session_id=upload_session_start_result.session_id,
                                                                offset=f.tell())
                     commit = dropbox.files.CommitInfo(path=dst_path)
 
-                    print(f'Uploading... now finished {(f.tell() / file_size) * 100}%...')
-
+                    print(f'Uploading... now finished {format((f.tell() / file_size) * 100, ".2f")}%...')
                     while f.tell() < file_size:
                         if (file_size - f.tell()) <= CHUNK_SIZE:
+                            # The tail of the uploading session and finishing the cursor.
                             res = self.__connect.files_upload_session_finish(f.read(CHUNK_SIZE), cursor, commit)
                         else:
+                            # According to the uploading session, continuing uploading the file.
                             self.__connect.files_upload_session_append(f.read(CHUNK_SIZE), cursor.session_id,
                                                                        cursor.offset)
-                            print(f'Uploading... now finished {f.tell() / file_size}%...')
+                            print(f'Uploading... now finished {format((f.tell() / file_size) * 100, ".2f")}%...')
                             cursor.offset = f.tell()
             return res
         except ApiError as e:
