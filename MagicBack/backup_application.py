@@ -3,7 +3,7 @@ import os
 from copy import deepcopy
 
 from __init__ import warning_str
-from decorator_back_process import DecoratorCheckDestination
+from decorator_backup_process import DecoratorUploader, DecoratorDownloader
 
 
 class BackupRestoreApp:
@@ -26,28 +26,34 @@ class BackupRestoreApp:
 
         # Parsing each of setting files' content.
         for stg in list(set(self.__settings) - set(self.__ignore_settings)):
-            # Init the lists.
-            self.__src_file_path = []
-            self.__dst_file_path = []
+            if self.__is_backup:
+                # Init the lists.
+                self.__src_file_path = []
+                self.__dst_file_path = []
 
-            # Start syncing the preferences.
-            self._sync_preferences(stg, self.__msg_callback)
+                # Start syncing the preferences.
+                self._backup_preferences(stg, self.__msg_callback)
+            else:
+                self._restore_preferences(stg, self.__msg_callback)
             self.__msg_callback('\n\n----------------------------------\n\n')
 
         # Show the msg for finishing syncing.
         # messagebox.showinfo("Notification", "All application's preferences have finished syncing.")
         self.__msg_callback("!!!!!! All application's preferences have finished syncing. !!!!!\n")
 
-    @DecoratorCheckDestination()
-    def _sync_preferences(self, setting_file, msg_callback):
+    @DecoratorUploader()
+    def _backup_preferences(self, setting_file, msg_callback):
         with open(os.path.join(self.__folder_path, setting_file)) as f:
             content = [c.strip() for c in f.readlines()]
 
         self.__obtain_app_name(setting_file)
-        # self.__msg_callback(start_syn_str % self.__app_name)
         self.__obtain_src_file_path(content)
 
-        return self.__src_file_path if self.__is_backup else self.__dst_file_path
+        return self.__src_file_path
+
+    @DecoratorDownloader()
+    def _restore_preferences(self, setting_file, msg_callback):
+        return
 
     def __obtain_app_name(self, app_name):
         self.__app_name = app_name.split('.')[0]

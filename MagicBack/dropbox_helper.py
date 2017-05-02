@@ -2,7 +2,7 @@
 import os
 
 import dropbox
-from decorator_check_login import DecoratorCheckLogin
+from decorator_checker import DecoratorCheckLogin
 from dropbox import files
 from dropbox.exceptions import ApiError
 

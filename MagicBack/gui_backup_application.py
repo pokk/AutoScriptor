@@ -3,7 +3,7 @@ import os
 from tkinter import Tk, FALSE, Frame, W, Checkbutton, Button, BooleanVar, Text, INSERT, Label, END
 
 from backup_application import BackupRestoreApp
-from decorator_back_process import root_remote_folder
+from decorator_backup_process import root_remote_folder
 from dropbox_helper import DropboxHelper
 
 
