@@ -2,13 +2,13 @@
 import os
 from copy import deepcopy
 
-from __init__ import warning_str, start_syn_str
+from __init__ import warning_str
 from decorator_back_process import DecoratorCheckDestination
 
 
 class BackupRestoreApp:
     def __init__(self):
-        self.__folder_path = '/'.join([os.path.dirname(__file__), 'application'])
+        self.__folder_path = os.path.join(os.path.dirname(__file__), 'application')
         self.__settings = []
         self.__ignore_settings = []
         self.__app_name = ''
@@ -40,11 +40,11 @@ class BackupRestoreApp:
 
     @DecoratorCheckDestination()
     def _sync_preferences(self, setting_file, msg_callback):
-        with open('/'.join([self.__folder_path, setting_file])) as f:
+        with open(os.path.join(self.__folder_path, setting_file)) as f:
             content = [c.strip() for c in f.readlines()]
 
         self.__obtain_app_name(setting_file)
-        self.__msg_callback(start_syn_str % self.__app_name)
+        # self.__msg_callback(start_syn_str % self.__app_name)
         self.__obtain_src_file_path(content)
 
         return self.__src_file_path if self.__is_backup else self.__dst_file_path
@@ -71,7 +71,8 @@ class BackupRestoreApp:
                     file_content[index - shift_number] = path_with_version
 
             # Translating to the real path.
-            self.__src_file_path = [os.path.expanduser(path) for path in file_content if path is not None]
+            self.__src_file_path = [os.path.expanduser(path) for path in file_content
+                                    if path is not None and os.path.exists(os.path.expanduser(path))]
 
     def __obtain_dst_file_path(self, dst_path, file_content):
         for c in [fc for fc in file_content if fc is not None]:
@@ -117,9 +118,8 @@ class BackupRestoreApp:
 
 
 def main():
-    # b = BackupRestoreApp()
-    # b.backup_restore_process()
-    pass
+    b = BackupRestoreApp()
+    b.backup_restore_process(None)
 
 
 if __name__ == '__main__':

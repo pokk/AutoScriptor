@@ -9,7 +9,7 @@ from dropbox_uploader import DropboxUploader
 
 class AppGui(Frame):
     def __init__(self, master=None):
-        self.__folder_path = '/'.join([os.path.dirname(__file__), 'application'])
+        self.__folder_path = os.path.join(os.path.dirname(__file__), 'application')
         self.__check_var = []
         self.__check_button_list = []
         self.msg_line = 1
@@ -32,7 +32,7 @@ class AppGui(Frame):
         index = 0
 
         for index, f in enumerate([name for name in os.listdir(self.__folder_path)
-                                   if os.path.isfile('/'.join([self.__folder_path, name]))]):
+                                   if os.path.isfile(os.path.join(self.__folder_path, name))]):
             self.__check_var.append(BooleanVar())
             self.__check_var[index].set(True)
             self.__check_button_list.append(Checkbutton(self, text=f, variable=self.__check_var[index],

@@ -8,7 +8,7 @@ from dropbox.exceptions import ApiError
 token_file = 'access.token'
 
 
-class DropboxUploader:
+class DropboxHelper:
     def __init__(self):
         self.SYNC_FOLDER_NAME = 'Sync'
         self.__connect = None
@@ -43,9 +43,36 @@ class DropboxUploader:
     # Upload file only.
     @DecoratorCheckLogin()
     def upload_file(self, src_path, dst_path):
+        CHUNK_SIZE = 10 * 1024 * 1024
+        full_src_path = os.path.expanduser(src_path)
+        file_size = os.path.getsize(full_src_path)
+
+        if not os.path.isfile(full_src_path):
+            return print('This is not a file...')
+
         try:
-            with open(os.path.expanduser(src_path), 'rb') as f:
-                res = self.__connect.files_upload(f.read(), dst_path, mute=True)
+            res = None
+            with open(full_src_path, 'rb') as f:
+                print('Finished opening the zip file...')
+                # If the file size is less than 150MB.
+                if (file_size << 20) < 150:
+                    res = self.__connect.files_upload(f.read(), dst_path, mute=True)
+                else:
+                    upload_session_start_result = self.__connect.files_upload_session_start(f.read(CHUNK_SIZE))
+                    cursor = dropbox.files.UploadSessionCursor(session_id=upload_session_start_result.session_id,
+                                                               offset=f.tell())
+                    commit = dropbox.files.CommitInfo(path=dst_path)
+
+                    print(f'Uploading... now finished {(f.tell() / file_size) * 100}%...')
+
+                    while f.tell() < file_size:
+                        if (file_size - f.tell()) <= CHUNK_SIZE:
+                            res = self.__connect.files_upload_session_finish(f.read(CHUNK_SIZE), cursor, commit)
+                        else:
+                            self.__connect.files_upload_session_append(f.read(CHUNK_SIZE), cursor.session_id,
+                                                                       cursor.offset)
+                            print(f'Uploading... now finished {f.tell() / file_size}%...')
+                            cursor.offset = f.tell()
             return res
         except ApiError as e:
             print(e)
@@ -86,10 +113,11 @@ class DropboxUploader:
 
 
 def main():
-    d = DropboxUploader()
+    d = DropboxHelper()
     # d.create_folder('/tt')
     # print(d.delete_file('/imgres.jpg'))
-    print(d.upload_file('~/Downloads/aa', '/bb'))
+    print(d.upload_file('~/Downloads/test.zip', '/test.zip'))
+    # print('res =', d.upload_file('~/Downloads/test.jpg', '/test.jpg'))
     # print(d.download_file('/tt', '~/Downloads/11.jpg'))
     # print(d.search_file_or_folder('/Synccc', 'test'))
 
