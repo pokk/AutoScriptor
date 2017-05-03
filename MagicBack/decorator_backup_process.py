@@ -19,8 +19,7 @@ class DecoratorUploader:
             src = func(*args)
 
             if not src or 0 == len(src):
-                print()
-                msg_callback(f'NOTICE!! You don\'t install the {app_name}\n\n')
+                msg_callback(f'NOTICE!! You don\'t install the {app_name}\n')
                 return
 
             # Zip variables.
@@ -28,12 +27,15 @@ class DecoratorUploader:
             full_zip_file = os.path.expanduser(os.path.join(temp_folder, zip_file_name))
 
             # 1. Zip the app preferences.
+            msg_callback('Starting packing preferences file to a zip package...\n')
             zip_files(src, full_zip_file)
             msg_callback('Finished packing preferences file to a zip package...\n')
             # 2. Upload.
-            remote_account.upload_file(full_zip_file, os.path.join(root_remote_folder, zip_file_name))
             msg_callback(f'{zip_file_name} starts uploading...\n')
+            remote_account.upload_file(full_zip_file, os.path.join(root_remote_folder, zip_file_name))
+            msg_callback('Finished uploading...\n')
             # 3. Remove the temp file.
+            msg_callback('Starting removing the preferences file...\n')
             os.remove(full_zip_file)
             msg_callback('Finished uploading your preferences and removing the temp zip package.\n')
 
@@ -59,11 +61,15 @@ class DecoratorDownloader:
             remote_account.download_file(os.path.join(root_remote_folder, zip_file_name), full_zip_file)
             msg_callback(f'Finished downloading the {zip_file_name}...\n')
             # 2. Unzip the app preferences.
+            msg_callback(f'Starting unzip the {zip_file_name}...\n')
             unzip_files(full_zip_file, temp_folder)
             msg_callback(f'Finished unpacking {zip_file_name} preferences file in \'{temp_folder}\'...\n')
             # 3. Move the backup file to local path.
+            msg_callback(f'Starting syncing the {zip_file_name}...\n')
             self._move_file(os.path.join(temp_folder, 'Users'))
+            msg_callback(f'Finished syncing the {zip_file_name}...\n')
             # 4. Remove the temp file and unzip file.
+            msg_callback('Starting removing the redundant files...')
             os.remove(full_zip_file)
             shutil.rmtree(os.path.expanduser(os.path.join(temp_folder, 'Users')))
             msg_callback('Finished removing the temp zip package.\n')

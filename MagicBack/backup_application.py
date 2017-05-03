@@ -26,6 +26,7 @@ class BackupRestoreApp:
 
         # Parsing each of setting files' content.
         for stg in list(set(self.__settings) - set(self.__ignore_settings)):
+            msg_callback(f'Starting to backup the {stg}...\n')
             if self.__is_backup:
                 # Init the lists.
                 self.__src_file_path = []
@@ -35,11 +36,12 @@ class BackupRestoreApp:
                 self._backup_preferences(stg, self.__msg_callback)
             else:
                 self._restore_preferences(stg, self.__msg_callback)
+                pass
             self.__msg_callback('\n\n----------------------------------\n\n')
 
         # Show the msg for finishing syncing.
         # messagebox.showinfo("Notification", "All application's preferences have finished syncing.")
-        self.__msg_callback("!!!!!! All application's preferences have finished syncing. !!!!!\n")
+        self.__msg_callback('!!!!!! All application\'s preferences have finished syncing. !!!!!\n')
 
     @DecoratorUploader()
     def _backup_preferences(self, setting_file, msg_callback):

@@ -1,6 +1,8 @@
 """ Created by jieyi on 4/30/17. """
 import os
-from tkinter import Tk, FALSE, Frame, W, Checkbutton, Button, BooleanVar, Text, INSERT, Label, END
+import threading
+import tkinter
+from tkinter import Tk, FALSE, Frame, W, Checkbutton, Button, BooleanVar, Text, Label, END, messagebox
 
 from backup_application import BackupRestoreApp
 from decorator_backup_process import root_remote_folder
@@ -12,8 +14,9 @@ class AppGui(Frame):
         self.__folder_path = os.path.join(os.path.dirname(__file__), 'application')
         self.__check_var = []
         self.__check_button_list = []
-        self.msg_line = 1
         self.__msg_text = None
+        self.__lock = threading.Lock()
+        self.msg_line = 1
 
         # Keeping the tk object.
         self.master = master
@@ -41,6 +44,9 @@ class AppGui(Frame):
 
         self.__msg_text = Text(self)
         self.__msg_text.grid(row=1, column=2, rowspan=20)
+        self.__msg_text.tag_config('warning', background='yellow', foreground='blue')
+        self.__msg_text.tag_config('finished', background='blue', foreground='white')
+        self.__msg_text.tag_config('starting', background='green')
         Label(self, text='Processing log').grid(row=0, column=2)
         Button(self, text='Invert', command=self._invert_checkbutton).grid(row=index + 1, column=0)
         Button(self, text='Select All', command=self._select_all_checkbutton).grid(row=index + 2, column=0)
@@ -49,10 +55,10 @@ class AppGui(Frame):
         Button(self, text='Restore', command=self._restore_event).grid(row=index + 3, column=1)
 
     def _backup_event(self):
-        self.__pre_backup_restore(True)
+        self.__active_thread_process(True)
 
     def _restore_event(self):
-        self.__pre_backup_restore(False)
+        self.__active_thread_process(False)
 
     def _select_all_checkbutton(self):
         for cb in self.__check_button_list:
@@ -66,23 +72,51 @@ class AppGui(Frame):
         for cb in self.__check_button_list:
             cb.toggle()
 
+    def __active_thread_process(self, is_back=True):
+        if self.__lock.locked():
+            messagebox.showinfo("Warning", "MagicBack is processing, you need to wait a moment.")
+        else:
+            threading.Thread(target=self.__pre_backup_restore, args=(is_back,)).start()
+
     def __pre_backup_restore(self, is_back=True):
+        self.__lock.acquire()
         self.__msg_text.delete(1.0, END)
         backup_process = BackupRestoreApp()
-        backup_process.remote_account = DropboxHelper()
+        backup_process.remote_account = DropboxHelper(self.__add_msg)
         # Create a new sync folder on the remote.
         backup_process.remote_account.create_folder(root_remote_folder)
         ignore = [k.cget('text') for k, v in zip(self.__check_button_list, self.__check_var) if not v.get()]
         backup_process.ignore_setting = ignore
         backup_process.backup_restore_process(self.__add_msg, is_back)
+        self.__lock.release()
 
     def __add_msg(self, msg):
-        self.__msg_text.insert(INSERT, msg)
-        current_line = float(self.__msg_text.index(END)) - 2
+        self.__msg_text.config(state=tkinter.NORMAL)
+        # Insert the msg END of the text.
+        self.__msg_text.insert(END, msg)
+        # Scroll to the end.
+        self.__msg_text.see(END)
         # Mark the yellow color when warning happened.
         if 'Warning' in msg:
-            self.__msg_text.tag_add('warning', str(current_line), f'{int(current_line)}.{len(msg)}')
-            self.__msg_text.tag_config('warning', background='yellow', foreground='blue')
+            self.__add_text_color('warning', msg)
+        elif '.setting' in msg:
+            self.__add_text_color('starting', msg)
+        elif 'your preferences' in msg:
+            self.__add_text_color('finished', msg)
+        self.__msg_text.config(state=tkinter.DISABLED)
+
+    def __add_text_color(self, tag, msg):
+        current_line = float(self.__msg_text.index(END)) - 2
+        self.__msg_text.tag_add(tag, str(current_line), f'{int(current_line)}.{len(msg)}')
+
+
+def center(win):
+    win.update_idletasks()
+    width = win.winfo_width()
+    height = win.winfo_height()
+    x = (win.winfo_screenwidth() // 2) - (width // 2)
+    y = (win.winfo_screenheight() // 2) - (height // 2)
+    win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 
 
 def main():

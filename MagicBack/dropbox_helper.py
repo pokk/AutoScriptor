@@ -1,18 +1,19 @@
 """ Created by jieyi on 5/1/17. """
 import os
 
-import dropbox
-from decorator_checker import DecoratorCheckLogin
-from dropbox import files
+from dropbox import files, dropbox
 from dropbox.exceptions import ApiError
+
+from decorator_checker import DecoratorCheckLogin
 
 token_file = 'access.token'
 
 
 class DropboxHelper:
-    def __init__(self, token=None):
+    def __init__(self, msg_callback=None, token=None):
         self.SYNC_FOLDER_NAME = 'Sync'
         self.__token = token
+        self.__msg_callback = msg_callback
         self.__connect = None
         self.__is_sync_folder = False
 
@@ -45,17 +46,16 @@ class DropboxHelper:
     # Upload file only.
     @DecoratorCheckLogin()
     def upload_file(self, src_path, dst_path):
-        CHUNK_SIZE = 10 * 1024 * 1024
+        CHUNK_SIZE = 4 * 1024 * 1024
         full_src_path = os.path.expanduser(src_path)
         file_size = os.path.getsize(full_src_path)
 
         if not os.path.isfile(full_src_path):
-            return print('This is not a file...')
+            return self._print_msg('This is not a file...\n')
 
         try:
             res = None
             with open(full_src_path, 'rb') as f:
-                print('Finished opening the zip file...')
                 # If the file size is less than 20MB.
                 if (file_size >> 20) < 20:
                     # TODO: 5/2/17 If the file exists, we should update it.
@@ -67,7 +67,7 @@ class DropboxHelper:
                                                                offset=f.tell())
                     commit = dropbox.files.CommitInfo(path=dst_path)
 
-                    print(f'Uploading... now finished {format((f.tell() / file_size) * 100, ".2f")}%...')
+                    self._print_msg(f'Uploading... now finished {format((f.tell() / file_size) * 100, ".2f")}%...\n')
                     while f.tell() < file_size:
                         if (file_size - f.tell()) <= CHUNK_SIZE:
                             # The tail of the uploading session and finishing the cursor.
@@ -76,8 +76,9 @@ class DropboxHelper:
                             # According to the uploading session, continuing uploading the file.
                             self.__connect.files_upload_session_append(f.read(CHUNK_SIZE), cursor.session_id,
                                                                        cursor.offset)
-                            print(f'Uploading... now finished {format((f.tell() / file_size) * 100, ".2f")}%...')
                             cursor.offset = f.tell()
+                        self._print_msg(
+                            f'Uploading... now finished {format((f.tell() / file_size) * 100, ".2f")}%...\n')
             return res
         except ApiError as e:
             print(e)
@@ -113,6 +114,10 @@ class DropboxHelper:
         except Exception as e:
             self.__connect = None
             print(e)
+
+    def _print_msg(self, msg):
+        if self.__msg_callback:
+            self.__msg_callback(msg)
 
     @property
     def connection(self):
