@@ -44,9 +44,11 @@ class AppGui(Frame):
 
         self.__msg_text = Text(self)
         self.__msg_text.grid(row=1, column=2, rowspan=20)
+        self.__msg_text.config(state=tkinter.DISABLED)
         self.__msg_text.tag_config('warning', background='yellow', foreground='blue')
         self.__msg_text.tag_config('finished', background='blue', foreground='white')
         self.__msg_text.tag_config('starting', background='green')
+        self.__msg_text.tag_config('error', background='red', foreground='yellow')
         Label(self, text='Processing log').grid(row=0, column=2)
         Button(self, text='Invert', command=self._invert_checkbutton).grid(row=index + 1, column=0)
         Button(self, text='Select All', command=self._select_all_checkbutton).grid(row=index + 2, column=0)
@@ -99,10 +101,12 @@ class AppGui(Frame):
         # Mark the yellow color when warning happened.
         if 'Warning' in msg:
             self.__add_text_color('warning', msg)
-        elif '.setting' in msg:
+        elif 'to backup' in msg:
             self.__add_text_color('starting', msg)
         elif 'your preferences' in msg:
             self.__add_text_color('finished', msg)
+        elif 'NOTICE' in msg:
+            self.__add_text_color('error', msg)
         self.__msg_text.config(state=tkinter.DISABLED)
 
     def __add_text_color(self, tag, msg):

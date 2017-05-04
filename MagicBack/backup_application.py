@@ -1,5 +1,6 @@
 """ Created by jieyi on 4/29/17. """
 import os
+import subprocess
 from copy import deepcopy
 
 from __init__ import warning_str
@@ -42,6 +43,8 @@ class BackupRestoreApp:
         # Show the msg for finishing syncing.
         # messagebox.showinfo("Notification", "All application's preferences have finished syncing.")
         self.__msg_callback('!!!!!! All application\'s preferences have finished syncing. !!!!!\n')
+        # Notification to mac.
+        subprocess.getoutput('ntfy -t "MagicBack" send "Finish the sync applications."')
 
     @DecoratorUploader()
     def _backup_preferences(self, setting_file, msg_callback):
