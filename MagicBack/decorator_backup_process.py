@@ -58,9 +58,12 @@ class DecoratorDownloader:
 
             # 1. Download.
             msg_callback(f'{zip_file_name} starts downloading...\n')
-            remote_account.download_file(os.path.join(root_remote_folder, zip_file_name), full_zip_file)
-            msg_callback(f'Finished downloading the {zip_file_name}...\n')
+            is_file_exist = remote_account.download_file(os.path.join(root_remote_folder, zip_file_name), full_zip_file)
             # 2. Unzip the app preferences.
+            if not is_file_exist:
+                msg_callback(f'NOTICE!! You don\'t have this backup file zip...\n')
+                return
+            msg_callback(f'Finished downloading the {zip_file_name}...\n')
             msg_callback(f'Starting unzip the {zip_file_name}...\n')
             unzip_files(full_zip_file, temp_folder)
             msg_callback(f'Finished unpacking {zip_file_name} preferences file in \'{temp_folder}\'...\n')
@@ -69,7 +72,7 @@ class DecoratorDownloader:
             self._move_file(os.path.join(temp_folder, 'Users'))
             msg_callback(f'Finished syncing the {zip_file_name}...\n')
             # 4. Remove the temp file and unzip file.
-            msg_callback('Starting removing the redundant files...')
+            msg_callback('Starting removing the redundant files...\n')
             os.remove(full_zip_file)
             shutil.rmtree(os.path.expanduser(os.path.join(temp_folder, 'Users')))
             msg_callback('Finished removing the temp zip package.\n')
