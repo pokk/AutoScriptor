@@ -32,6 +32,9 @@ There are `build.command` in each of modules' folder. After you double click the
 
 The app you built will be in `dist` folder. You can click the app to run it.
 
+# Known issue
+
+- [ ] If there're no directories, the backup files won't be restored in the restoring.
 
 # License
 
