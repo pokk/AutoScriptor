@@ -2,7 +2,7 @@
 import os
 import threading
 import tkinter
-from tkinter import Tk, FALSE, Frame, W, Checkbutton, Button, BooleanVar, Text, Label, END, messagebox
+from tkinter import BooleanVar, Button, Checkbutton, END, FALSE, Frame, Label, Text, Tk, W, messagebox
 
 from backup_application import BackupRestoreApp
 from decorator_backup_process import root_remote_folder
@@ -39,7 +39,7 @@ class AppGui(Frame):
             self.__check_var.append(BooleanVar())
             self.__check_var[index].set(True)
             self.__check_button_list.append(Checkbutton(self, text=f, variable=self.__check_var[index],
-                                                        onvalue=True, offvalue=False))
+                                                        onvalue=True, offvalue=False, background='blue'))
             self.__check_button_list[index].grid(row=index, column=0, sticky=W, columnspan=2)
 
         self.__msg_text = Text(self)
